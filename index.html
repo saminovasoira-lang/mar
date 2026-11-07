@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="uz" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULASH MARKET — Zamonaviy Onlayn Do‘kon va Tezkor Yetkazib Berish</title>
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet CSS & JS (OpenStreetMap) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Chart.js for Admin Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <!-- Maxsus CSS styllar -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- 1. Yuqori Topbar (Aloqa, Shahar va Maxfiy Admin kaliti) -->
+    <header class="bg-white border-b border-slate-200 text-xs text-slate-600 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Kichik info chiziq -->
+            <div class="py-1.5 border-b border-slate-100 flex items-center justify-between text-[11px]">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1 text-slate-700 font-medium">
+                        <span>📍</span>
+                        <span>Shahar: <b class="text-blue-600">Toshkent</b></span>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1 text-slate-500">
+                        <span>🏬</span>
+                        <span>4 ta markaziy filial va ombor</span>
+                    </div>
+                    <div class="hidden md:flex items-center gap-1 text-emerald-600 font-medium">
+                        <span>⚡</span>
+                        <span>Tezkor yetkazish 30 daqiqada</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a href="tel:+998712000000" class="hover:text-blue-600 font-medium flex items-center gap-1">
+                        <span>📞</span>
+                        <span>+998 71 200-00-00</span>
+                    </a>
+                    
+                    <!-- Maxfiy Direktor (Admin) qulf belgisi -->
+                    <button onclick="window.ulashApp.openAdminAuthModal()" class="text-slate-400 hover:text-amber-600 flex items-center gap-1 font-semibold transition" title="Direktor (Admin) maxfiy boshqaruv paneli [Ctrl+Shift+A]">
+                        <span>🔒</span>
+                        <span class="hidden sm:inline text-[10px]">Direktor</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Asosiy Navigatsiya qatori -->
+            <div class="py-3 flex items-center justify-between gap-4">
+                <!-- Logo -->
+                <a href="#home" onclick="window.ulashApp.navigateTo('home')" class="flex items-center gap-2 group shrink-0">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-black text-xl shadow-md shadow-blue-200 group-hover:scale-105 transition-transform">
+                        U
+                    </div>
+                    <div>
+                        <div class="text-xl font-black tracking-tight text-blue-600 group-hover:text-blue-700 transition">
+                            ULASH<span class="text-slate-800">.MARKET</span>
+                        </div>
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400 -mt-1">
+                            Tezkor Gipermarket
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Katalog Tugmasi -->
+                <button onclick="window.ulashApp.navigateTo('catalog')" class="hidden md:flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-200 transition">
+                    <span>☰</span>
+                    <span>Katalog</span>
+                </button>
+
+                <!-- Qidiruv paneli -->
+                <div class="flex-1 max-w-2xl relative">
+                    <input type="text" placeholder="Mahsulotlar va brendlarni qidirish (masalan: iPhone, Nike, Artel)..." class="global-search-input w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 bg-slate-50/70 font-medium transition">
+                    <span class="absolute left-3.5 top-3 text-slate-400 text-xs">🔍</span>
+                </div>
+
+                <!-- Foydalanuvchi harakatlari -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Buyurtmalarim -->
+                    <button onclick="window.ulashApp.navigateTo('orders')" class="nav-link-btn hidden lg:flex flex-col items-center p-1.5 text-slate-600 hover:text-blue-600 transition" data-page="orders">
+                        <span class="text-lg">📋</span>
+                        <span class="text-[11px] font-medium mt-0.5">Buyurtmalar</span>
+                    </button>
+
+                    <!-- Filiallar -->
+                    <button onclick="window.ulashApp.navigateTo('branches')" class="nav-link-btn hidden lg:flex flex-col items-center p-1.5 text-slate-600 hover:text-blue-600 transition" data-page="branches">
+                        <span class="text-lg">🏬</span>
+                        <span class="text-[11px] font-medium mt-0.5">Filiallar</span>
+                    </button>
+
+                    <!-- Kuryer Rejimi -->
+                    <button onclick="window.ulashApp.navigateTo('courier')" class="nav-link-btn hidden sm:flex flex-col items-center p-1.5 text-slate-600 hover:text-blue-600 transition" data-page="courier">
+                        <span class="text-lg">🛵</span>
+                        <span class="text-[11px] font-medium mt-0.5">Kuryer</span>
+                    </button>
+
+                    <!-- Kirish / Profil -->
+                    <button onclick="window.ulashApp.openAuthModal()" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition border border-transparent hover:border-slate-200">
+                        <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                            👤
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <div class="text-xs font-bold text-slate-800 leading-none" id="header-user-name">Kirish</div>
+                            <span class="text-[10px]" id="header-user-role">Mijoz</span>
+                        </div>
+                    </button>
+
+                    <!-- Savatcha -->
+                    <button onclick="window.ulashCatalog.openCartModal()" class="relative flex items-center gap-2.5 px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold transition border border-blue-200">
+                        <span class="text-lg">🛒</span>
+                        <span class="hidden md:inline text-xs cart-total-header">0 so‘m</span>
+                        <span class="cart-badge-count absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-blue-600 text-white text-[11px] font-bold flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ASOSIY SAHIFA KONTENTLARI (CONTAINERS) -->
+    <div id="main-content-flow" class="flex-1 pb-20 md:pb-12">
+        
+        <!-- ==========================================
+             1. BOSH SAHIFA (HOME)
+             ========================================== -->
+        <div id="home-page-container">
+            <div class="max-w-7xl mx-auto px-4 py-6 space-y-8">
+                
+                <!-- Hero Banner Carousel -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-800 text-white shadow-xl min-h-[220px] md:min-h-[280px] flex items-center p-6 md:p-12">
+                    <div class="max-w-xl z-10 space-y-3">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md border border-white/30 inline-block">
+                            🔥 Bahorgi Katta Chegirmalar — 50% gacha
+                        </span>
+                        <h1 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+                            ULASH MARKET BILAN TEZ VA ARZON
+                        </h1>
+                        <p class="text-xs sm:text-sm text-blue-100 font-medium">
+                            Smartfonlar, noutbuklar, maishiy texnika va barcha kundalik tovarlar eng yaqin filialdan 30 daqiqada uyingizda!
+                        </p>
+                        <div class="pt-2 flex flex-wrap gap-3">
+                            <button onclick="window.ulashApp.navigateTo('catalog')" class="px-6 py-3 bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs rounded-xl shadow-lg transition">
+                                Xaridni boshlash ➔
+                            </button>
+                            <button onclick="window.ulashApp.navigateTo('branches')" class="px-5 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs rounded-xl transition">
+                                Filiallar va Xarita
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bezak ikonkalari -->
+                    <div class="absolute right-4 md:right-12 text-7xl md:text-9xl opacity-20 select-none pointer-events-none">
+                        🛍️
+                    </div>
+                </div>
+
+                <!-- Kategoriyalar Qatori (Pills) -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-base font-bold text-slate-800">Ommabop Kategoriyalar</h2>
+                        <button onclick="window.ulashApp.navigateTo('catalog')" class="text-xs font-semibold text-blue-600 hover:underline">
+                            Barchasi →
+                        </button>
+                    </div>
+                    <div id="categories-strip" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                        <!-- renderCategoriesNav() orqali to'ldiriladi -->
+                    </div>
+                </div>
+
+                <!-- Aksiya va Chegirmalar Banneri -->
+                <div class="bg-gradient-to-r from-amber-500 to-rose-500 rounded-2xl p-4 md:p-5 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">⚡</div>
+                        <div>
+                            <div class="font-extrabold text-sm md:text-base">Kun Taklifi: Aksiya va Super Narxlar!</div>
+                            <div class="text-xs text-amber-100">Barcha chegirmali mahsulotlarni maxsus narxlarda xarid qiling</div>
+                        </div>
+                    </div>
+                    <button onclick="UlashCatalog.onlyDiscounted = true; UlashCatalog.renderProducts(); document.getElementById('catalog-section').scrollIntoView({behavior: 'smooth'})" class="px-4 py-2 bg-white text-slate-900 font-bold text-xs rounded-xl hover:bg-amber-50 transition shadow">
+                        Faqat chegirmalarni ko‘rish
+                    </button>
+                </div>
+
+                <!-- Katalog va Mahsulotlar Bo'limi -->
+                <div id="catalog-section" class="space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Mahsulotlar Katalogi</h2>
+                            <p class="text-xs text-slate-500 mt-0.5" id="products-count">16 ta mahsulot mavjud</p>
+                        </div>
+
+                        <!-- Filtrlash va Saralash -->
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <select onchange="UlashCatalog.sortBy = this.value; UlashCatalog.renderProducts();" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-600 bg-white shadow-sm">
+                                <option value="default">Standart saralash</option>
+                                <option value="price-asc">Avval arzonroq</option>
+                                <option value="price-desc">Avval qimmatroq</option>
+                                <option value="rating">Reytingi yuqorilar</option>
+                            </select>
+
+                            <button onclick="UlashCatalog.resetFilters()" class="text-xs text-slate-500 hover:text-blue-600 font-semibold underline shrink-0">
+                                Tozalash
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mahsulotlar setkasi -->
+                    <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        <!-- renderProducts() orqali to'ldiriladi -->
+                    </div>
+                </div>
+
+                <!-- Afzalliklar Bloklari -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-200">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold">
+                            ⚡
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-xs">Tezkor Yetkazish</h4>
+                            <p class="text-[11px] text-slate-500">Eng yaqin filialdan 30-45 daqiqada</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold">
+                            🛡️
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-xs">100% Kafolat</h4>
+                            <p class="text-[11px] text-slate-500">Rasmiy kafolatli original mahsulotlar</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold">
+                            💳
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-xs">Qulay To‘lov</h4>
+                            <p class="text-[11px] text-slate-500">Naqd, Click, Payme yoki Karta</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold">
+                            🏬
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-xs">4 Ta Filial</h4>
+                            <p class="text-[11px] text-slate-500">Toshkent bo‘ylab qulay lokatsiyalar</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==========================================
+             2. KATALOG SAHIFASI
+             ========================================== -->
+        <div id="catalog-page-container" class="hidden">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <!-- Ichki katalog mazmuni home sahifasi bilan sinxron ishlaydi -->
+            </div>
+        </div>
+
+        <!-- ==========================================
+             3. BUYURTMA RASMIYLASHTIRISH (CHECKOUT)
+             ========================================== -->
+        <div id="checkout-page-container" class="hidden">
+            <!-- checkout.js orqali to'ldiriladi -->
+        </div>
+
+        <!-- ==========================================
+             4. BUYURTMALAR TARIXI VA KUZATISH
+             ========================================== -->
+        <div id="orders-page-container" class="hidden">
+            <!-- app.js orqali to'ldiriladi -->
+        </div>
+
+        <!-- ==========================================
+             5. FILIALLAR VA XARITA
+             ========================================== -->
+        <div id="branches-page-container" class="hidden">
+            <!-- app.js va map.js orqali to'ldiriladi -->
+        </div>
+
+        <!-- ==========================================
+             6. KURYER PANELI
+             ========================================== -->
+        <div id="courier-panel-container" class="hidden">
+            <!-- courier.js orqali to'ldiriladi -->
+        </div>
+
+        <!-- ==========================================
+             7. DIREKTOR (ADMIN) PANELI
+             ========================================== -->
+        <div id="admin-panel-container" class="hidden">
+            <!-- admin.js orqali to'ldiriladi -->
+        </div>
+
+        <!-- ==========================================
+             8. PROFIL SAHIFASI
+             ========================================== -->
+        <div id="profile-page-container" class="hidden">
+            <!-- app.js orqali to'ldiriladi -->
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         MODALLAR VA FLOATING ELEMENTLAR
+         ========================================== -->
+
+    <!-- A) Mahsulot Tafsilotlari Modali (Quick View) -->
+    <div id="product-detail-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl relative border border-slate-200">
+            <button onclick="UlashCatalog.closeProductModal()" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold">
+                ✕
+            </button>
+            <div id="product-detail-content">
+                <!-- catalog.js orqali dinamik chiziladi -->
+            </div>
+        </div>
+    </div>
+
+    <!-- B) Savatcha Modali (Drawer) -->
+    <div id="cart-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200 max-h-[90vh] flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                    <span>🛒</span>
+                    <span>Savatchangiz</span>
+                </h3>
+                <button onclick="UlashCatalog.closeCartModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+            </div>
+
+            <div id="cart-modal-items" class="flex-1 overflow-y-auto py-2 my-2 pr-1">
+                <!-- catalog.js orqali dinamik to'ldiriladi -->
+            </div>
+
+            <div id="cart-modal-summary" class="border-t border-slate-100 pt-3">
+                <!-- catalog.js orqali to'ldiriladi -->
+            </div>
+        </div>
+    </div>
+
+    <!-- C) Standart Login & Ro'yxatdan o'tish Modali (Foydalanuvchi va Kuryer) -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 relative">
+            <button onclick="window.ulashApp.closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold">✕</button>
+
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold">
+                    🔑
+                </div>
+                <h3 class="font-bold text-slate-800 text-lg">Tizimga kirish</h3>
+                <p class="text-xs text-slate-400">Telefon raqam yoki Gmail orqali kiring</p>
+            </div>
+
+            <form onsubmit="window.ulashApp.handleLoginSubmit(event)" class="space-y-4 text-xs">
+                <!-- Rol tanlash (Faqat Foydalanuvchi va Kuryer, Admin yashirin!) -->
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1.5">Tizimdagi rolingizni tanlang:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer bg-slate-50/50 hover:border-blue-400 transition">
+                            <input type="radio" name="login-role" value="user" checked class="text-blue-600">
+                            <span class="font-bold text-slate-800">👤 Foydalanuvchi</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer bg-slate-50/50 hover:border-blue-400 transition">
+                            <input type="radio" name="login-role" value="courier" class="text-blue-600">
+                            <span class="font-bold text-slate-800">🛵 Kuryer</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Telefon raqam yoki Gmail *</label>
+                    <input type="text" id="login-account" required placeholder="+998 90 123-45-67 yoki ism@gmail.com" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-600 font-medium">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Parol *</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-600 font-medium">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition">
+                    Kirish
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- D) Direktor (Admin) Maxfiy Kirish Modali -->
+    <div id="admin-secret-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-amber-300 relative">
+            <button onclick="window.ulashApp.closeAdminAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold">✕</button>
+
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 mx-auto mb-2 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl font-bold border border-amber-200">
+                    👑
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg">Direktor Boshqaruv Paneli</h3>
+                <p class="text-xs text-slate-500">Maxfiy boshqaruv kodi orqali tizimga kirish</p>
+            </div>
+
+            <form onsubmit="window.ulashApp.handleAdminSecretSubmit(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1.5">Maxsus Admin Paroli (PIN) *</label>
+                    <input type="password" id="admin-secret-pin" required placeholder="Parolni kiriting (Standart: admin123)" class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100 font-medium text-center text-base tracking-widest">
+                    <span class="text-[10px] text-slate-400 mt-1 block text-center">Standart sinov paroli: <b class="text-slate-700">admin123</b></span>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl shadow-lg shadow-amber-200 transition">
+                    Boshqaruv Tizimiga Kirish ➔
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- E) Floating Tezkor Rol Tanlagich (Testerlar uchun qulay) -->
+    <div id="quick-role-switcher">
+        <!-- app.js orqali to'ldiriladi -->
+    </div>
+
+    <!-- F) Mobil Pastki Navigatsiya Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 flex items-center justify-around py-2 mobile-nav-bar">
+        <button onclick="window.ulashApp.navigateTo('home')" class="flex flex-col items-center text-slate-600 hover:text-blue-600">
+            <span class="text-base">🏠</span>
+            <span class="text-[10px] font-semibold mt-0.5">Asosiy</span>
+        </button>
+        <button onclick="window.ulashApp.navigateTo('catalog')" class="flex flex-col items-center text-slate-600 hover:text-blue-600">
+            <span class="text-base">📦</span>
+            <span class="text-[10px] font-semibold mt-0.5">Katalog</span>
+        </button>
+        <button onclick="window.ulashApp.navigateTo('orders')" class="flex flex-col items-center text-slate-600 hover:text-blue-600">
+            <span class="text-base">📋</span>
+            <span class="text-[10px] font-semibold mt-0.5">Buyurtmalar</span>
+        </button>
+        <button onclick="window.ulashCatalog.openCartModal()" class="flex flex-col items-center text-slate-600 hover:text-blue-600 relative">
+            <span class="text-base">🛒</span>
+            <span class="cart-badge-count absolute -top-1 right-2 w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center">0</span>
+            <span class="text-[10px] font-semibold mt-0.5">Savatcha</span>
+        </button>
+        <button onclick="window.ulashApp.navigateTo('profile')" class="flex flex-col items-center text-slate-600 hover:text-blue-600">
+            <span class="text-base">👤</span>
+            <span class="text-[10px] font-semibold mt-0.5">Profil</span>
+        </button>
+    </nav>
+
+    <!-- 8. Footer (Sayt osti) -->
+    <footer class="bg-white border-t border-slate-200 text-xs text-slate-600 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="text-lg font-black text-blue-600 mb-2">ULASH.MARKET</div>
+                    <p class="text-slate-500 text-xs leading-relaxed mb-4">
+                        Yandex Market uslubidagi zamonaviy onlayn gipermarket va Toshkent bo‘ylab 30 daqiqalik yetkazib berish xizmati.
+                    </p>
+                    <div class="text-[11px] text-slate-400">© 2026 ULASH MARKET. Barcha huquqlar himoyalangan.</div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-3 uppercase tracking-wider text-[11px]">Kategoriyalar</h4>
+                    <ul class="space-y-1.5 text-xs text-slate-500">
+                        <li><a href="#catalog" onclick="UlashCatalog.filterByCategory('smartfonlar')" class="hover:text-blue-600">Smartfon va gadjetlar</a></li>
+                        <li><a href="#catalog" onclick="UlashCatalog.filterByCategory('noutbuklar')" class="hover:text-blue-600">Noutbuk va kompyuterlar</a></li>
+                        <li><a href="#catalog" onclick="UlashCatalog.filterByCategory('maishiy-texnika')" class="hover:text-blue-600">Maishiy texnika</a></li>
+                        <li><a href="#catalog" onclick="UlashCatalog.filterByCategory('kiyim')" class="hover:text-blue-600">Kiyim va poyabzallar</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-3 uppercase tracking-wider text-[11px]">Xizmatlar</h4>
+                    <ul class="space-y-1.5 text-xs text-slate-500">
+                        <li><a href="#orders" onclick="window.ulashApp.navigateTo('orders')" class="hover:text-blue-600">Buyurtma holatini kuzatish</a></li>
+                        <li><a href="#branches" onclick="window.ulashApp.navigateTo('branches')" class="hover:text-blue-600">Filiallar va yetkazish xaritasi</a></li>
+                        <li><a href="#courier" onclick="window.ulashApp.navigateTo('courier')" class="hover:text-blue-600">Kuryerlar uchun portal</a></li>
+                        <li><a href="#checkout" onclick="window.ulashApp.navigateTo('checkout')" class="hover:text-blue-600">Buyurtma rasmiylashtirish</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-3 uppercase tracking-wider text-[11px]">Aloqa & Boshqaruv</h4>
+                    <p class="text-xs text-slate-500 mb-1">Mijozlarni qo‘llab-quvvatlash:</p>
+                    <a href="tel:+998712000000" class="text-blue-600 font-bold text-sm block mb-3">+998 71 200-00-00</a>
+                    
+                    <!-- Yashirin Direktor kirishi -->
+                    <div class="pt-3 border-t border-slate-100">
+                        <button onclick="window.ulashApp.openAdminAuthModal()" class="text-slate-400 hover:text-amber-600 text-xs flex items-center gap-1.5 font-medium transition">
+                            <span>🔒</span>
+                            <span>Direktor (Admin) Maxfiy Kirishi</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SKRIPTLAR TARTIBI -->
+    <script src="js/data.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/checkout.js"></script>
+    <script src="js/courier.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Initsializatsiya -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.ulashCatalog.init();
+            window.ulashAdmin.init();
+            window.ulashApp.init();
+        });
+    </script>
+</body>
+</html>
